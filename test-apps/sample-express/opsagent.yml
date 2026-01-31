@@ -1,0 +1,34 @@
+app:
+    language: Node.js
+    name: sample-express
+    type: auto
+build:
+    cache: true
+cache:
+    size: small
+    type: redis
+database:
+    backup:
+        enabled: true
+        frequency: daily
+        retention: 7
+    type: postgresql
+    version: "15"
+environments:
+    production:
+        region: auto
+        replicas: 1
+        resources:
+            cpu: 250m
+            memory: 256Mi
+        scaling:
+            enabled: true
+            max: 5
+            min: 1
+            target_cpu: 70
+    staging:
+        clone_from: production
+        replicas: 1
+monitoring:
+    enabled: true
+version: "1"

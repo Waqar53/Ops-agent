@@ -1,0 +1,51 @@
+app:
+    framework: Next.js
+    language: Node.js
+    name: nextjs-app
+    type: auto
+build:
+    base_image: node:20-alpine
+    health_check: /
+    multi_stage: true
+    port: 3000
+environments:
+    production:
+        region: auto
+        replicas: 1
+        resources:
+            cpu: 250m
+            memory: 512Mi
+        scaling:
+            enabled: true
+            max: 5
+            min: 1
+            target_cpu: 70
+    staging:
+        clone_from: production
+        replicas: 1
+monitoring:
+    alerts:
+        - cpu_usage > 80%
+        - memory_usage > 85%
+        - error_rate > 1%
+        - latency_p99 > 500ms
+        - ssr_render_time > 200ms
+    logging: true
+    metrics: true
+    tracing: false
+security:
+    scanning: true
+    secrets: encrypted
+    ssl: auto
+services:
+    postgresql:
+        backup:
+            enabled: true
+            frequency: daily
+            retention: 7
+        enabled: true
+        version: "15"
+    redis:
+        enabled: true
+        version: "7"
+version: "1"
