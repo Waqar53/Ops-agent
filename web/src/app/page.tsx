@@ -15,9 +15,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto px-6 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <Rocket className="w-5 h-5 text-white" />
-                            </div>
+                            <img src="/logo.png" alt="OpsAgent" className="w-8 h-8 rounded-lg" />
                             <span className="text-xl font-bold">OpsAgent</span>
                         </div>
                         <nav className="hidden md:flex items-center gap-8">
@@ -250,9 +248,7 @@ export default function LandingPage() {
                 <div className="max-w-7xl mx-auto">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                <Rocket className="w-5 h-5 text-white" />
-                            </div>
+                            <img src="/logo.png" alt="OpsAgent" className="w-8 h-8 rounded-lg" />
                             <span className="text-xl font-bold">OpsAgent</span>
                         </div>
                         <div className="flex items-center gap-8 text-sm text-gray-400">
@@ -262,7 +258,7 @@ export default function LandingPage() {
                             <Link href="/terms" className="hover:text-white transition">Terms</Link>
                         </div>
                         <div className="text-sm text-gray-400">
-                            © 2024 OpsAgent. All rights reserved.
+                            Made by <span className="text-white font-medium">Mohd Waqar Azim</span>
                         </div>
                     </div>
                 </div>
