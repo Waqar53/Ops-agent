@@ -17,6 +17,10 @@
 
 **[Live Demo](https://opsagent.dev)** · **[Documentation](https://docs.opsagent.dev)** · **[Product Hunt](https://producthunt.com/posts/opsagent)** · **[Discord](https://discord.gg/opsagent)**
 
+<br>
+
+<img src="docs/hero.png" alt="OpsAgent Dashboard" width="100%">
+
 </div>
 
 ---
