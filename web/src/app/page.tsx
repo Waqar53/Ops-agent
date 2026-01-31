@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Rocket, Zap, Shield, BarChart3, DollarSign, Lock, ArrowRight, Check, Terminal } from 'lucide-react';
+
 export const metadata: Metadata = {
     title: 'OpsAgent - DevOps on Autopilot',
     description: 'Stop wrestling with infrastructure. OpsAgent AI analyzes your code, provisions optimal resources, and deploys your applications—all with zero configuration.',
 };
+
 export default function LandingPage() {
     return (
         <div className="min-h-screen bg-black text-white">
@@ -30,6 +32,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </header>
+
             {/* Hero */}
             <section className="pt-32 pb-20 px-6">
                 <div className="max-w-7xl mx-auto text-center">
@@ -37,13 +40,16 @@ export default function LandingPage() {
                         <Rocket className="w-4 h-4" />
                         7-Day Free Trial • No credit card required
                     </div>
+
                     <h1 className="text-6xl md:text-7xl font-bold mb-6">
                         DevOps on <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">Autopilot</span>
                     </h1>
+
                     <p className="text-xl text-gray-400 max-w-3xl mx-auto mb-12">
                         Stop wrestling with infrastructure. OpsAgent AI analyzes your code,
                         provisions optimal resources, and deploys your applications—all with zero configuration.
                     </p>
+
                     {/* Stats */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto mb-12">
                         <div>
@@ -63,6 +69,7 @@ export default function LandingPage() {
                             <div className="text-sm text-gray-400">Services Detected</div>
                         </div>
                     </div>
+
                     {/* Terminal Demo */}
                     <div className="max-w-3xl mx-auto bg-gray-900 rounded-xl border border-gray-800 overflow-hidden mb-12">
                         <div className="flex items-center gap-2 px-4 py-3 bg-gray-800 border-b border-gray-700">
@@ -82,9 +89,10 @@ export default function LandingPage() {
                             <div className="text-green-400 mt-4">$ ops deploy</div>
                             <div className="text-gray-400 mt-2">✓ Built in 45s</div>
                             <div className="text-gray-400">✓ Deployed to production</div>
-                            <div className="text-blue-400 mt-2">→ https:
+                            <div className="text-blue-400 mt-2">→ https://my-app.opsagent.dev</div>
                         </div>
                     </div>
+
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <Link href="/signup" className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-lg font-semibold text-lg transition flex items-center gap-2">
                             Start 7-Day Free Trial
@@ -96,6 +104,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
             {/* Features */}
             <section id="features" className="py-20 px-6 bg-gradient-to-b from-black to-gray-900">
                 <div className="max-w-7xl mx-auto">
@@ -103,6 +112,7 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
                         <p className="text-xl text-gray-400">Enterprise-grade DevOps, zero configuration required</p>
                     </div>
+
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {[
                             {
@@ -153,6 +163,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
             {/* How It Works */}
             <section className="py-20 px-6">
                 <div className="max-w-7xl mx-auto">
@@ -160,6 +171,7 @@ export default function LandingPage() {
                         <h2 className="text-4xl md:text-5xl font-bold mb-4">Deploy in 3 Simple Steps</h2>
                         <p className="text-xl text-gray-400">From code to production in minutes</p>
                     </div>
+
                     <div className="grid md:grid-cols-3 gap-8">
                         {[
                             {
@@ -200,6 +212,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
             {/* CTA */}
             <section className="py-20 px-6">
                 <div className="max-w-4xl mx-auto text-center">
@@ -231,6 +244,7 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
             {/* Footer */}
             <footer className="border-t border-gray-800 py-12 px-6">
                 <div className="max-w-7xl mx-auto">

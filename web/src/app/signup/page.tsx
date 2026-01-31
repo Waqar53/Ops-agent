@@ -1,29 +1,39 @@
 'use client';
+
 import Link from 'next/link';
 import { useState } from 'react';
+
 export default function SignupPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [name, setName] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
         try {
-            const res = await fetch('http:
+            const res = await fetch('http://localhost:8080/api/v1/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password }),
             });
+
             if (!res.ok) {
                 const data = await res.text();
                 throw new Error(data || 'Registration failed');
             }
+
             const { token, user } = await res.json();
+
+            // Store token and user
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
+
+            // Redirect to dashboard
             window.location.href = '/dashboard';
         } catch (err: any) {
             setError(err.message);
@@ -31,17 +41,20 @@ export default function SignupPage() {
             setLoading(false);
         }
     };
+
     return (
         <div style={styles.page}>
             <Link href="/" style={styles.backLink}>
                 ← Back to home
             </Link>
+
             <div style={styles.container}>
                 <div style={styles.header}>
                     <span style={styles.logoIcon}>◈</span>
                     <h1 style={styles.title}>Start your 7-day free trial</h1>
                     <p style={styles.subtitle}>No credit card required. Cancel anytime.</p>
                 </div>
+
                 <form onSubmit={handleSubmit} style={styles.form}>
                     <div style={styles.field}>
                         <label style={styles.label}>Full Name</label>
@@ -54,6 +67,7 @@ export default function SignupPage() {
                             required
                         />
                     </div>
+
                     <div style={styles.field}>
                         <label style={styles.label}>Email</label>
                         <input
@@ -65,6 +79,7 @@ export default function SignupPage() {
                             required
                         />
                     </div>
+
                     <div style={styles.field}>
                         <label style={styles.label}>Password</label>
                         <input
@@ -78,19 +93,24 @@ export default function SignupPage() {
                         />
                         <span style={styles.hint}>Minimum 8 characters</span>
                     </div>
+
                     {error && <div style={styles.error}>{error}</div>}
+
                     <button type="submit" style={styles.button} disabled={loading}>
                         {loading ? 'Creating account...' : 'Start Free Trial →'}
                     </button>
+
                     <p style={styles.terms}>
                         By signing up, you agree to our{' '}
                         <Link href="/terms" style={styles.link}>Terms of Service</Link> and{' '}
                         <Link href="/privacy" style={styles.link}>Privacy Policy</Link>.
                     </p>
                 </form>
+
                 <div style={styles.divider}>
                     <span>or continue with</span>
                 </div>
+
                 <div style={styles.oauth}>
                     <button style={styles.oauthBtn}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -108,6 +128,7 @@ export default function SignupPage() {
                         Google
                     </button>
                 </div>
+
                 <p style={styles.loginLink}>
                     Already have an account? <Link href="/login" style={styles.link}>Sign in</Link>
                 </p>
@@ -115,6 +136,7 @@ export default function SignupPage() {
         </div>
     );
 }
+
 const styles: { [key: string]: React.CSSProperties } = {
     page: {
         minHeight: '100vh',

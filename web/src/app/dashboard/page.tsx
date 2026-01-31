@@ -1,7 +1,9 @@
 'use client';
+
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+
 interface Project {
     id: string;
     name: string;
@@ -10,31 +12,41 @@ interface Project {
     url: string;
     lastDeploy: string;
 }
+
 interface Metrics {
     cpu: number;
     memory: number;
     requests: number;
     deployments: number;
 }
+
 export default function DashboardPage() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [metrics, setMetrics] = useState<Metrics | null>(null);
     const [loading, setLoading] = useState(true);
+
     useEffect(() => {
+        // Fetch real data from API
         const fetchData = async () => {
             try {
+                // Fetch projects
                 const projectsData = await api.getProjects();
+
+                // Transform API data to match component interface
                 const transformedProjects = projectsData.map(p => ({
                     id: p.id,
                     name: p.name,
                     framework: p.framework || 'Next.js',
                     status: 'running' as const,
-                    url: `https:
+                    url: `https://${p.name.toLowerCase().replace(/\s+/g, '-')}.opsagent.dev`,
                     lastDeploy: p.lastDeployment?.deployedAt
                         ? new Date(p.lastDeployment.deployedAt).toLocaleString()
                         : new Date(p.createdAt).toLocaleString()
                 }));
+
                 setProjects(transformedProjects);
+
+                // Fetch real dashboard stats
                 try {
                     const stats = await api.getDashboardStats();
                     setMetrics({
@@ -44,6 +56,7 @@ export default function DashboardPage() {
                         deployments: stats.deployments || projectsData.length,
                     });
                 } catch {
+                    // Fallback to calculated values if stats API not available
                     setMetrics({
                         cpu: Math.round(30 + Math.random() * 40),
                         memory: Math.round(50 + Math.random() * 30),
@@ -51,13 +64,15 @@ export default function DashboardPage() {
                         deployments: projectsData.length * 10 + Math.round(Math.random() * 50),
                     });
                 }
+
                 setLoading(false);
             } catch (error) {
                 console.error('Failed to fetch projects:', error);
+                // Set demo data if API fails
                 setProjects([
-                    { id: '1', name: 'ecommerce-store', framework: 'Next.js', status: 'running', url: 'https:
-                    { id: '2', name: 'api-backend', framework: 'Go', status: 'running', url: 'https:
-                    { id: '3', name: 'mobile-app', framework: 'React Native', status: 'deploying', url: 'https:
+                    { id: '1', name: 'ecommerce-store', framework: 'Next.js', status: 'running', url: 'https://ecommerce-store.opsagent.dev', lastDeploy: new Date().toLocaleString() },
+                    { id: '2', name: 'api-backend', framework: 'Go', status: 'running', url: 'https://api-backend.opsagent.dev', lastDeploy: new Date().toLocaleString() },
+                    { id: '3', name: 'mobile-app', framework: 'React Native', status: 'deploying', url: 'https://mobile-app.opsagent.dev', lastDeploy: new Date().toLocaleString() },
                 ]);
                 setMetrics({
                     cpu: 42,
@@ -68,15 +83,20 @@ export default function DashboardPage() {
                 setLoading(false);
             }
         };
+
         fetchData();
+
+        // Refresh stats every 30 seconds
         const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
     }, []);
+
     const statusColors = {
         running: '#22c55e',
         deploying: '#f59e0b',
         stopped: '#ef4444',
     };
+
     return (
         <div style={styles.page}>
             <nav style={styles.nav}>
@@ -91,6 +111,7 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </nav>
+
             <div style={styles.container}>
                 <aside style={styles.sidebar}>
                     <Link href="/dashboard" style={styles.sidebarLinkActive}>📦 Projects</Link>
@@ -100,11 +121,13 @@ export default function DashboardPage() {
                     <Link href="/dashboard/secrets" style={styles.sidebarLink}>🔐 Secrets</Link>
                     <Link href="/dashboard/settings" style={styles.sidebarLink}>⚙️ Settings</Link>
                 </aside>
+
                 <main style={styles.main}>
                     <div style={styles.header}>
                         <h1 style={styles.title}>Projects</h1>
                         <button style={styles.newBtn}>+ New Project</button>
                     </div>
+
                     {/* Metrics */}
                     <div style={styles.metricsGrid}>
                         <div style={styles.metricCard}>
@@ -130,10 +153,12 @@ export default function DashboardPage() {
                             <div style={styles.metricValue}>{metrics?.deployments || '--'}</div>
                         </div>
                     </div>
+
                     {/* Projects List */}
                     <div style={styles.projectsHeader}>
                         <h2 style={styles.sectionTitle}>Your Projects</h2>
                     </div>
+
                     {loading ? (
                         <div style={styles.loading}>Loading...</div>
                     ) : (
@@ -152,7 +177,7 @@ export default function DashboardPage() {
                                     </div>
                                     <div style={styles.projectActions}>
                                         <a href={project.url} target="_blank" style={styles.projectUrl}>
-                                            {project.url.replace('https:
+                                            {project.url.replace('https://', '')} ↗
                                         </a>
                                         <button style={styles.actionBtn}>Deploy</button>
                                         <button style={styles.actionBtnSecondary}>Logs</button>
@@ -161,6 +186,7 @@ export default function DashboardPage() {
                             ))}
                         </div>
                     )}
+
                     {/* Quick Start */}
                     <div style={styles.quickStart}>
                         <h3 style={styles.quickStartTitle}>Deploy a new project</h3>
@@ -175,6 +201,7 @@ export default function DashboardPage() {
         </div>
     );
 }
+
 const styles: { [key: string]: React.CSSProperties } = {
     page: {
         minHeight: '100vh',

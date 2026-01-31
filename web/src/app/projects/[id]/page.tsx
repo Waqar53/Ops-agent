@@ -1,35 +1,44 @@
 'use client';
+
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { api, Project, Deployment, Environment } from '@/lib/api';
 import { Activity, GitBranch, Clock, TrendingUp, Cpu, HardDrive, Network, DollarSign } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
 export default function ProjectDetailPage() {
     const params = useParams();
     const projectId = params.id as string;
+
     const { data: project } = useQuery<Project>({
         queryKey: ['project', projectId],
         queryFn: () => api.getProject(projectId),
     });
+
     const { data: deployments } = useQuery<Deployment[]>({
         queryKey: ['deployments', projectId],
         queryFn: () => api.getDeployments(projectId),
     });
+
     const { data: environments } = useQuery<Environment[]>({
         queryKey: ['environments', projectId],
         queryFn: () => api.getEnvironments(projectId),
     });
+
+    // Mock metrics data
     const metricsData = Array.from({ length: 24 }, (_, i) => ({
         time: `${i}:00`,
         cpu: Math.random() * 100,
         memory: Math.random() * 100,
         requests: Math.random() * 1000,
     }));
+
     if (!project) {
         return <div className="min-h-screen bg-gray-900 flex items-center justify-center">
             <div className="text-white">Loading...</div>
         </div>;
     }
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
             {/* Header */}
@@ -53,6 +62,7 @@ export default function ProjectDetailPage() {
                     </div>
                 </div>
             </header>
+
             <main className="max-w-7xl mx-auto px-6 py-8">
                 {/* Environments */}
                 <div className="mb-8">
@@ -83,6 +93,7 @@ export default function ProjectDetailPage() {
                             )}
                     </div>
                 </div>
+
                 {/* Metrics */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
@@ -103,6 +114,7 @@ export default function ProjectDetailPage() {
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
+
                     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold text-white">Memory Usage</h3>
@@ -122,6 +134,7 @@ export default function ProjectDetailPage() {
                         </ResponsiveContainer>
                     </div>
                 </div>
+
                 {/* Recent Deployments */}
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
                     <h2 className="text-xl font-bold text-white mb-4">Recent Deployments</h2>
