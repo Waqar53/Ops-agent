@@ -1,5 +1,4 @@
 package analyzer
-
 import (
 	"bufio"
 	"context"
@@ -10,10 +9,7 @@ import (
 	"regexp"
 	"strings"
 )
-
-// Language represents detected programming language
 type Language int
-
 const (
 	LanguageUnknown Language = iota
 	LanguageNodeJS
@@ -25,17 +21,12 @@ const (
 	LanguagePHP
 	LanguageDotNet
 )
-
 func (l Language) String() string {
 	return [...]string{"Unknown", "Node.js", "Python", "Go", "Rust", "Java", "Ruby", "PHP", ".NET"}[l]
 }
-
-// Framework represents detected framework
 type Framework int
-
 const (
 	FrameworkUnknown Framework = iota
-	// Node.js
 	FrameworkExpress
 	FrameworkNextJS
 	FrameworkNestJS
@@ -45,20 +36,17 @@ const (
 	FrameworkSvelteKit
 	FrameworkRemix
 	FrameworkAstro
-	// Python
 	FrameworkFastAPI
 	FrameworkDjango
 	FrameworkFlask
 	FrameworkStarlette
 	FrameworkSanic
 	FrameworkAiohttp
-	// Go
 	FrameworkGin
 	FrameworkEcho
 	FrameworkFiber
 	FrameworkChi
 	FrameworkMux
-	// Rust
 	FrameworkActix
 	FrameworkRocket
 	FrameworkAxum
@@ -66,19 +54,16 @@ const (
 	FrameworkTide
 	FrameworkPoem
 	FrameworkSalvo
-	// Java
 	FrameworkSpringBoot
 	FrameworkQuarkus
 	FrameworkMicronaut
 	FrameworkPlay
 	FrameworkDropwizard
-	// Ruby
 	FrameworkRails
 	FrameworkSinatra
 	FrameworkHanami
 	FrameworkPadrino
 	FrameworkGrape
-	// PHP
 	FrameworkLaravel
 	FrameworkSymfony
 	FrameworkCodeIgniter
@@ -87,12 +72,10 @@ const (
 	FrameworkCakePHP
 	FrameworkYii
 	FrameworkLaminas
-	// .NET
 	FrameworkASPNETCore
 	FrameworkBlazor
 	FrameworkNancy
 )
-
 func (f Framework) String() string {
 	names := map[Framework]string{
 		FrameworkUnknown:     "Unknown",
@@ -150,8 +133,6 @@ func (f Framework) String() string {
 	}
 	return "Unknown"
 }
-
-// Service represents a detected external service
 type Service struct {
 	Type     string `json:"type"`
 	Version  string `json:"version,omitempty"`
@@ -159,18 +140,14 @@ type Service struct {
 	Required bool   `json:"required"`
 	Config   string `json:"config,omitempty"`
 }
-
-// SecurityIssue represents a detected security concern
 type SecurityIssue struct {
-	Severity    string `json:"severity"` // critical, high, medium, low
+	Severity    string `json:"severity"`
 	Type        string `json:"type"`
 	Description string `json:"description"`
 	File        string `json:"file,omitempty"`
 	Line        int    `json:"line,omitempty"`
 	Suggestion  string `json:"suggestion"`
 }
-
-// Dependency represents a package dependency
 type Dependency struct {
 	Name            string `json:"name"`
 	Version         string `json:"version"`
@@ -180,8 +157,6 @@ type Dependency struct {
 	Deprecated      bool   `json:"deprecated"`
 	DevOnly         bool   `json:"dev_only"`
 }
-
-// Resources represents resource estimates
 type Resources struct {
 	MinCPU      string  `json:"min_cpu"`
 	MaxCPU      string  `json:"max_cpu"`
@@ -193,8 +168,6 @@ type Resources struct {
 	AutoScale   bool    `json:"auto_scale"`
 	GPURequired bool    `json:"gpu_required"`
 }
-
-// BuildConfig represents build configuration
 type BuildConfig struct {
 	Dockerfile   string            `json:"dockerfile,omitempty"`
 	BuildCommand string            `json:"build_command"`
@@ -206,8 +179,6 @@ type BuildConfig struct {
 	BaseImage    string            `json:"base_image"`
 	MultiStage   bool              `json:"multi_stage"`
 }
-
-// MonitoringConfig represents auto-configured monitoring
 type MonitoringConfig struct {
 	MetricsEnabled bool     `json:"metrics_enabled"`
 	LoggingEnabled bool     `json:"logging_enabled"`
@@ -216,8 +187,6 @@ type MonitoringConfig struct {
 	DashboardType  string   `json:"dashboard_type"`
 	RetentionDays  int      `json:"retention_days"`
 }
-
-// Analysis represents complete project analysis
 type Analysis struct {
 	ProjectPath  string           `json:"project_path"`
 	ProjectName  string           `json:"project_name"`
@@ -233,13 +202,9 @@ type Analysis struct {
 	Monitoring   MonitoringConfig `json:"monitoring"`
 	Suggestions  []string         `json:"suggestions"`
 }
-
-// Analyzer performs intelligent code analysis
 type Analyzer struct {
 	detectors []LanguageDetector
 }
-
-// LanguageDetector interface for language-specific detection
 type LanguageDetector interface {
 	Detect(ctx context.Context, path string) (*DetectionResult, error)
 	DetectFramework(ctx context.Context, path string) (Framework, float64, error)
@@ -247,16 +212,12 @@ type LanguageDetector interface {
 	ScanSecurity(ctx context.Context, path string) ([]SecurityIssue, error)
 	GetBuildConfig(ctx context.Context, path string, framework Framework) (*BuildConfig, error)
 }
-
-// DetectionResult from a language detector
 type DetectionResult struct {
 	Language   Language
 	Confidence float64
 	EntryPoint string
 	Version    string
 }
-
-// New creates a new analyzer with all detectors
 func New() *Analyzer {
 	return &Analyzer{
 		detectors: []LanguageDetector{
@@ -266,12 +227,9 @@ func New() *Analyzer {
 			NewRustDetector(),
 			NewRubyDetector(),
 			NewPHPDetector(),
-			// TODO: Add Java and .NET detectors
 		},
 	}
 }
-
-// Analyze performs complete analysis of a project
 func (a *Analyzer) Analyze(ctx context.Context, projectPath string) (*Analysis, error) {
 	analysis := &Analysis{
 		ProjectPath:  projectPath,
@@ -282,10 +240,7 @@ func (a *Analyzer) Analyze(ctx context.Context, projectPath string) (*Analysis, 
 		Security:     []SecurityIssue{},
 		Suggestions:  []string{},
 	}
-
-	// Detect language and framework
 	var bestDetector LanguageDetector
-
 	for _, detector := range a.detectors {
 		result, err := detector.Detect(ctx, projectPath)
 		if err != nil {
@@ -298,46 +253,27 @@ func (a *Analyzer) Analyze(ctx context.Context, projectPath string) (*Analysis, 
 			analysis.EntryPoint = result.EntryPoint
 		}
 	}
-
 	if bestDetector != nil {
-		// Detect framework
 		framework, frameworkConf, _ := bestDetector.DetectFramework(ctx, projectPath)
 		analysis.Framework = framework
 		analysis.Confidence = (analysis.Confidence + frameworkConf) / 2
-
-		// Detect services
 		services, _ := bestDetector.DetectServices(ctx, projectPath)
 		analysis.Services = services
-
-		// Security scan
 		issues, _ := bestDetector.ScanSecurity(ctx, projectPath)
 		analysis.Security = issues
-
-		// Get build config
 		buildConfig, _ := bestDetector.GetBuildConfig(ctx, projectPath, framework)
 		if buildConfig != nil {
 			analysis.Build = *buildConfig
 		}
 	}
-
-	// Parse dependencies
 	analysis.Dependencies = a.parseDependencies(projectPath, analysis.Language)
-
-	// Estimate resources
 	analysis.Resources = a.estimateResources(analysis)
-
-	// Configure monitoring
 	analysis.Monitoring = a.configureMonitoring(analysis)
-
-	// Generate suggestions
 	analysis.Suggestions = a.generateSuggestions(analysis)
-
 	return analysis, nil
 }
-
 func (a *Analyzer) parseDependencies(path string, lang Language) []Dependency {
 	deps := []Dependency{}
-
 	switch lang {
 	case LanguageNodeJS:
 		pkgPath := filepath.Join(path, "package.json")
@@ -419,10 +355,8 @@ func (a *Analyzer) parseDependencies(path string, lang Language) []Dependency {
 			}
 		}
 	}
-
 	return deps
 }
-
 func (a *Analyzer) estimateResources(analysis *Analysis) Resources {
 	resources := Resources{
 		MinCPU:    "250m",
@@ -434,8 +368,6 @@ func (a *Analyzer) estimateResources(analysis *Analysis) Resources {
 		Replicas:  1,
 		AutoScale: true,
 	}
-
-	// Adjust based on framework
 	switch analysis.Framework {
 	case FrameworkNextJS, FrameworkNuxt, FrameworkRemix:
 		resources.MinMemory = "512Mi"
@@ -452,8 +384,6 @@ func (a *Analyzer) estimateResources(analysis *Analysis) Resources {
 		resources.MaxMemory = "4Gi"
 		resources.EstCost = 95.0
 	}
-
-	// Adjust based on services
 	for _, svc := range analysis.Services {
 		switch svc.Type {
 		case "postgresql", "mysql":
@@ -469,8 +399,6 @@ func (a *Analyzer) estimateResources(analysis *Analysis) Resources {
 			resources.MaxMemory = "4Gi"
 		}
 	}
-
-	// Adjust based on dependency count
 	depCount := len(analysis.Dependencies)
 	if depCount > 50 {
 		resources.MinMemory = "512Mi"
@@ -481,10 +409,8 @@ func (a *Analyzer) estimateResources(analysis *Analysis) Resources {
 		resources.MaxMemory = "4Gi"
 		resources.EstCost += 20.0
 	}
-
 	return resources
 }
-
 func (a *Analyzer) configureMonitoring(analysis *Analysis) MonitoringConfig {
 	config := MonitoringConfig{
 		MetricsEnabled: true,
@@ -499,28 +425,20 @@ func (a *Analyzer) configureMonitoring(analysis *Analysis) MonitoringConfig {
 		DashboardType: "standard",
 		RetentionDays: 30,
 	}
-
-	// Enable tracing for microservice architectures
 	if analysis.Framework == FrameworkNestJS || analysis.Framework == FrameworkFastAPI ||
 		analysis.Framework == FrameworkGin || analysis.Framework == FrameworkSpringBoot {
 		config.TracingEnabled = true
 	}
-
-	// Add framework-specific alerts
 	switch analysis.Framework {
 	case FrameworkNextJS, FrameworkRemix:
 		config.AlertRules = append(config.AlertRules, "ssr_render_time > 200ms")
 	case FrameworkExpress, FrameworkFastify:
 		config.AlertRules = append(config.AlertRules, "request_queue_size > 100")
 	}
-
 	return config
 }
-
 func (a *Analyzer) generateSuggestions(analysis *Analysis) []string {
 	suggestions := []string{}
-
-	// Security suggestions
 	if len(analysis.Security) > 0 {
 		criticalCount := 0
 		for _, issue := range analysis.Security {
@@ -533,8 +451,6 @@ func (a *Analyzer) generateSuggestions(analysis *Analysis) []string {
 				fmt.Sprintf("🔒 %d security issues found - review before deploying", criticalCount))
 		}
 	}
-
-	// Dependency suggestions
 	outdatedCount := 0
 	for _, dep := range analysis.Dependencies {
 		if dep.Vulnerabilities > 0 {
@@ -545,14 +461,10 @@ func (a *Analyzer) generateSuggestions(analysis *Analysis) []string {
 		suggestions = append(suggestions,
 			fmt.Sprintf("📦 %d dependencies have known vulnerabilities", outdatedCount))
 	}
-
-	// Performance suggestions
 	if analysis.Resources.EstCost > 100 {
 		suggestions = append(suggestions,
 			"💡 Consider using spot instances to reduce costs by up to 70%")
 	}
-
-	// Framework-specific suggestions
 	switch analysis.Framework {
 	case FrameworkNextJS:
 		suggestions = append(suggestions,
@@ -564,15 +476,10 @@ func (a *Analyzer) generateSuggestions(analysis *Analysis) []string {
 		suggestions = append(suggestions,
 			"⚡ Enable database connection pooling for better performance")
 	}
-
-	// Missing configurations
 	if analysis.Build.HealthCheck == "" {
 		suggestions = append(suggestions,
 			"❤️ Add a health check endpoint for better reliability monitoring")
 	}
-
 	return suggestions
 }
-
-// Nuxt framework constant (was missing)
 const FrameworkNuxt Framework = 100

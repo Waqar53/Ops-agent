@@ -1,5 +1,4 @@
 package analyzer
-
 import (
 	"context"
 	"encoding/json"
@@ -7,25 +6,19 @@ import (
 	"path/filepath"
 	"strings"
 )
-
-// PHPDetector detects PHP projects
 type PHPDetector struct{}
-
 func NewPHPDetector() *PHPDetector {
 	return &PHPDetector{}
 }
-
 func (d *PHPDetector) Detect(ctx context.Context, path string) (*DetectionResult, error) {
 	composerPath := filepath.Join(path, "composer.json")
 	if _, err := os.Stat(composerPath); os.IsNotExist(err) {
 		return nil, nil
 	}
-
 	data, err := os.ReadFile(composerPath)
 	if err != nil {
 		return nil, err
 	}
-
 	var composer struct {
 		Require map[string]string `json:"require"`
 		Config  struct {
@@ -35,13 +28,11 @@ func (d *PHPDetector) Detect(ctx context.Context, path string) (*DetectionResult
 		} `json:"config"`
 	}
 	json.Unmarshal(data, &composer)
-
-	version := "8.2" // Default
+	version := "8.2"
 	if phpVer, ok := composer.Require["php"]; ok {
 		version = strings.TrimPrefix(phpVer, "^")
 		version = strings.TrimPrefix(version, "~")
 	}
-
 	return &DetectionResult{
 		Language:   LanguagePHP,
 		Confidence: 0.9,
@@ -49,41 +40,31 @@ func (d *PHPDetector) Detect(ctx context.Context, path string) (*DetectionResult
 		Version:    version,
 	}, nil
 }
-
 func (d *PHPDetector) findEntryPoint(path string) string {
-	// Laravel
 	if _, err := os.Stat(filepath.Join(path, "artisan")); err == nil {
 		return "public/index.php"
 	}
-
-	// Symfony
 	if _, err := os.Stat(filepath.Join(path, "bin/console")); err == nil {
 		return "public/index.php"
 	}
-
-	// Common entry points
 	entries := []string{"public/index.php", "index.php", "app.php", "web/index.php"}
 	for _, entry := range entries {
 		if _, err := os.Stat(filepath.Join(path, entry)); err == nil {
 			return entry
 		}
 	}
-
 	return "index.php"
 }
-
 func (d *PHPDetector) DetectFramework(ctx context.Context, path string) (Framework, float64, error) {
 	composerPath := filepath.Join(path, "composer.json")
 	data, err := os.ReadFile(composerPath)
 	if err != nil {
 		return FrameworkUnknown, 0, err
 	}
-
 	var composer struct {
 		Require map[string]string `json:"require"`
 	}
 	json.Unmarshal(data, &composer)
-
 	frameworks := []struct {
 		pkg        string
 		framework  Framework
@@ -99,31 +80,24 @@ func (d *PHPDetector) DetectFramework(ctx context.Context, path string) (Framewo
 		{"yiisoft/yii2", FrameworkYii, 0.95},
 		{"laminas/laminas-mvc", FrameworkLaminas, 0.90},
 	}
-
 	for _, fw := range frameworks {
 		if _, ok := composer.Require[fw.pkg]; ok {
 			return fw.framework, fw.confidence, nil
 		}
 	}
-
 	return FrameworkUnknown, 0.5, nil
 }
-
 func (d *PHPDetector) DetectServices(ctx context.Context, path string) ([]Service, error) {
 	var services []Service
 	composerPath := filepath.Join(path, "composer.json")
-
 	data, err := os.ReadFile(composerPath)
 	if err != nil {
 		return services, nil
 	}
-
 	var composer struct {
 		Require map[string]string `json:"require"`
 	}
 	json.Unmarshal(data, &composer)
-
-	// Database detection
 	dbPackages := map[string]Service{
 		"doctrine/dbal":               {Type: "postgresql", Version: "15", Reason: "Doctrine DBAL in composer.json"},
 		"illuminate/database":         {Type: "mysql", Version: "8", Reason: "Laravel database in composer.json"},
@@ -132,36 +106,27 @@ func (d *PHPDetector) DetectServices(ctx context.Context, path string) ([]Servic
 		"phpredis/phpredis":           {Type: "redis", Version: "7", Reason: "PhpRedis in composer.json"},
 		"elasticsearch/elasticsearch": {Type: "elasticsearch", Version: "8", Reason: "Elasticsearch client in composer.json"},
 	}
-
 	for pkg, svc := range dbPackages {
 		if _, ok := composer.Require[pkg]; ok {
 			services = append(services, svc)
 		}
 	}
-
-	// Queue systems
 	if _, ok := composer.Require["php-amqplib/php-amqplib"]; ok {
 		services = append(services, Service{
 			Type:   "rabbitmq",
 			Reason: "AMQP library in composer.json",
 		})
 	}
-
-	// Object storage
 	if _, ok := composer.Require["aws/aws-sdk-php"]; ok {
 		services = append(services, Service{
 			Type:   "s3",
 			Reason: "AWS SDK in composer.json",
 		})
 	}
-
 	return services, nil
 }
-
 func (d *PHPDetector) ScanSecurity(ctx context.Context, path string) ([]SecurityIssue, error) {
 	var issues []SecurityIssue
-
-	// Check for .env in .gitignore
 	gitignorePath := filepath.Join(path, ".gitignore")
 	if gitignoreContent, err := os.ReadFile(gitignorePath); err == nil {
 		if !strings.Contains(string(gitignoreContent), ".env") {
@@ -174,8 +139,6 @@ func (d *PHPDetector) ScanSecurity(ctx context.Context, path string) ([]Security
 			})
 		}
 	}
-
-	// Check for debug mode in Laravel
 	envPath := filepath.Join(path, ".env")
 	if content, err := os.ReadFile(envPath); err == nil {
 		if strings.Contains(string(content), "APP_DEBUG=true") {
@@ -188,8 +151,6 @@ func (d *PHPDetector) ScanSecurity(ctx context.Context, path string) ([]Security
 			})
 		}
 	}
-
-	// Check for hardcoded database credentials
 	configFiles := []string{"config/database.php", ".env", "config.php"}
 	for _, configFile := range configFiles {
 		configPath := filepath.Join(path, configFile)
@@ -208,10 +169,8 @@ func (d *PHPDetector) ScanSecurity(ctx context.Context, path string) ([]Security
 			}
 		}
 	}
-
 	return issues, nil
 }
-
 func (d *PHPDetector) GetBuildConfig(ctx context.Context, path string, framework Framework) (*BuildConfig, error) {
 	config := &BuildConfig{
 		BuildCommand: "composer install --no-dev --optimize-autoloader",
@@ -223,7 +182,6 @@ func (d *PHPDetector) GetBuildConfig(ctx context.Context, path string, framework
 		BaseImage:  "php:8.2-fpm-alpine",
 		MultiStage: true,
 	}
-
 	switch framework {
 	case FrameworkLaravel:
 		config.BuildCommand = "composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan view:cache"
@@ -246,17 +204,13 @@ func (d *PHPDetector) GetBuildConfig(ctx context.Context, path string, framework
 		config.StartCommand = "php -S 0.0.0.0:8000"
 		config.Port = 8000
 	}
-
 	config.Dockerfile = d.generateDockerfile(config, framework)
-
 	return config, nil
 }
-
 func (d *PHPDetector) generateDockerfile(config *BuildConfig, framework Framework) string {
 	dockerfile := `# Auto-generated by OpsAgent - PHP Multi-Stage Build
 FROM php:8.2-fpm-alpine AS builder
 WORKDIR /app
-
 # Install build dependencies
 RUN apk add --no-cache \
     git \
@@ -264,47 +218,34 @@ RUN apk add --no-cache \
     libzip-dev \
     postgresql-dev \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip
-
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
-
 # Copy composer files
 COPY composer.json composer.lock ./
-
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-scripts
-
 # Copy application code
 COPY . .
-
 # Run post-install scripts
 RUN composer run-script post-install-cmd --no-interaction || true
-
 # Runtime stage
 FROM php:8.2-fpm-alpine AS runner
 WORKDIR /app
-
 # Install runtime dependencies
 RUN apk add --no-cache \
     libzip \
     postgresql-libs \
     nginx \
     && docker-php-ext-install pdo pdo_mysql pdo_pgsql zip opcache
-
 # Create non-root user
 RUN addgroup -g 1000 appuser && \
     adduser -D -u 1000 -G appuser appuser
-
 # Copy app from builder
 COPY --from=builder /app /app
-
 # Set ownership
 RUN chown -R appuser:appuser /app
-
 USER appuser
-
 EXPOSE ` + string(rune(config.Port)) + `
-
 CMD ["` + config.StartCommand + `"]
 `
 	return dockerfile

@@ -1,40 +1,30 @@
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 export default function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
-
         try {
-            const res = await fetch('http://localhost:8080/api/v1/auth/login', {
+            const res = await fetch('http:
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
-
             if (!res.ok) {
                 const data = await res.text();
                 throw new Error(data || 'Invalid credentials');
             }
-
             const { token, user } = await res.json();
-
-            // Store token and user
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
-
-            // Redirect to dashboard
             router.push('/dashboard');
         } catch (err: any) {
             setError(err.message);
@@ -42,7 +32,6 @@ export default function LoginPage() {
             setLoading(false);
         }
     };
-
     return (
         <div style={styles.container}>
             <div style={styles.card}>
@@ -50,16 +39,13 @@ export default function LoginPage() {
                     <h1 style={styles.logo}>OpsAgent</h1>
                     <p style={styles.tagline}>DevOps Automation Platform</p>
                 </div>
-
                 <h2 style={styles.title}>Welcome Back</h2>
                 <p style={styles.subtitle}>Sign in to your account</p>
-
                 {error && (
                     <div style={styles.error}>
                         <span>⚠️</span> {error}
                     </div>
                 )}
-
                 <form onSubmit={handleLogin} style={styles.form}>
                     <div style={styles.inputGroup}>
                         <label style={styles.label}>Email</label>
@@ -72,7 +58,6 @@ export default function LoginPage() {
                             required
                         />
                     </div>
-
                     <div style={styles.inputGroup}>
                         <label style={styles.label}>Password</label>
                         <input
@@ -84,7 +69,6 @@ export default function LoginPage() {
                             required
                         />
                     </div>
-
                     <button
                         type="submit"
                         style={{
@@ -97,18 +81,15 @@ export default function LoginPage() {
                         {loading ? 'Signing in...' : 'Sign In'}
                     </button>
                 </form>
-
                 <div style={styles.footer}>
                     Don't have an account?{' '}
                     <Link href="/signup" style={styles.link}>
                         Sign up
                     </Link>
                 </div>
-
                 <div style={styles.divider}>
                     <span>or continue with</span>
                 </div>
-
                 <div style={styles.oauth}>
                     <button style={styles.oauthButton} onClick={() => alert('GitHub OAuth coming soon!')}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -130,7 +111,6 @@ export default function LoginPage() {
         </div>
     );
 }
-
 const styles = {
     container: {
         minHeight: '100vh',

@@ -1,25 +1,20 @@
 'use client';
-
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { DollarSign, TrendingDown, TrendingUp, Zap, Server, Database, HardDrive } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-
 export default function CostPage() {
     const params = useParams();
     const projectId = params.id as string;
-
     const { data: costData } = useQuery({
         queryKey: ['cost', projectId],
         queryFn: () => api.getCost(projectId),
     });
-
     const { data: forecast } = useQuery({
         queryKey: ['cost-forecast', projectId],
         queryFn: () => api.getCostForecast(projectId),
     });
-
     const breakdown = [
         { name: 'Compute', value: 450, color: '#3B82F6' },
         { name: 'Database', value: 380, color: '#8B5CF6' },
@@ -27,7 +22,6 @@ export default function CostPage() {
         { name: 'Network', value: 180, color: '#F59E0B' },
         { name: 'Other', value: 117, color: '#6B7280' },
     ];
-
     const recommendations = [
         {
             title: 'Use Spot Instances',
@@ -48,7 +42,6 @@ export default function CostPage() {
             icon: HardDrive,
         },
     ];
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
             <div className="max-w-7xl mx-auto px-6 py-8">
@@ -65,7 +58,6 @@ export default function CostPage() {
                             -$183 from last month
                         </div>
                     </div>
-
                     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-gray-400 text-sm">Forecast (End of Month)</span>
@@ -76,7 +68,6 @@ export default function CostPage() {
                             Based on current usage trends
                         </div>
                     </div>
-
                     <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-6">
                         <div className="flex items-center justify-between mb-2">
                             <span className="text-green-400 text-sm font-medium">Potential Savings</span>
@@ -88,7 +79,6 @@ export default function CostPage() {
                         </div>
                     </div>
                 </div>
-
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                     {/* Cost Breakdown */}
                     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
@@ -125,7 +115,6 @@ export default function CostPage() {
                             ))}
                         </div>
                     </div>
-
                     {/* Optimization Recommendations */}
                     <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
                         <h2 className="text-xl font-bold text-white mb-6">Optimization Recommendations</h2>
@@ -154,7 +143,6 @@ export default function CostPage() {
                         </div>
                     </div>
                 </div>
-
                 {/* Detailed Breakdown */}
                 <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-xl p-6">
                     <h2 className="text-xl font-bold text-white mb-6">Detailed Cost Breakdown</h2>

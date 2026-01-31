@@ -1,11 +1,8 @@
 'use client';
-
 import Link from 'next/link';
 import { useState } from 'react';
-
 export default function PricingPage() {
     const [annual, setAnnual] = useState(true);
-
     const plans = [
         {
             name: 'Starter',
@@ -56,7 +53,6 @@ export default function PricingPage() {
             highlight: false,
         },
     ];
-
     return (
         <div style={styles.page}>
             <nav style={styles.nav}>
@@ -73,13 +69,11 @@ export default function PricingPage() {
                     </div>
                 </div>
             </nav>
-
             <section style={styles.hero}>
                 <h1 style={styles.h1}>Simple, transparent pricing</h1>
                 <p style={styles.subtitle}>
                     Start free, scale as you grow. No hidden fees, cancel anytime.
                 </p>
-
                 <div style={styles.toggle}>
                     <span style={!annual ? styles.toggleActive : styles.toggleInactive}>Monthly</span>
                     <button
@@ -96,7 +90,6 @@ export default function PricingPage() {
                     </span>
                 </div>
             </section>
-
             <section style={styles.plans}>
                 {plans.map((plan, i) => (
                     <div
@@ -132,7 +125,6 @@ export default function PricingPage() {
                     </div>
                 ))}
             </section>
-
             <section style={styles.faq}>
                 <h2 style={styles.faqTitle}>Frequently Asked Questions</h2>
                 <div style={styles.faqGrid}>
@@ -166,14 +158,12 @@ export default function PricingPage() {
                     </div>
                 </div>
             </section>
-
             <footer style={styles.footer}>
                 <p style={styles.footerText}>© 2024 OpsAgent. All rights reserved.</p>
             </footer>
         </div>
     );
 }
-
 const styles: { [key: string]: React.CSSProperties } = {
     page: {
         minHeight: '100vh',

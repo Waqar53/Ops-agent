@@ -1,25 +1,20 @@
 'use client';
-
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tantml:react-query';
 import { api, Environment } from '@/lib/api';
 import { Rocket, GitBranch, Settings, Play } from 'lucide-react';
-
 export default function DeployPage() {
     const params = useParams();
     const projectId = params.id as string;
     const queryClient = useQueryClient();
-
     const [selectedEnv, setSelectedEnv] = useState('production');
     const [selectedBranch, setSelectedBranch] = useState('main');
     const [selectedStrategy, setSelectedStrategy] = useState('rolling');
-
     const { data: environments } = useQuery<Environment[]>({
         queryKey: ['environments', projectId],
         queryFn: () => api.getEnvironments(projectId),
     });
-
     const deployMutation = useMutation({
         mutationFn: () => api.deploy(projectId, {
             environment: selectedEnv,
@@ -30,11 +25,9 @@ export default function DeployPage() {
             queryClient.invalidateQueries({ queryKey: ['deployments', projectId] });
         },
     });
-
     const handleDeploy = () => {
         deployMutation.mutate();
     };
-
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
             <div className="max-w-4xl mx-auto px-6 py-12">
@@ -48,7 +41,6 @@ export default function DeployPage() {
                             <p className="text-gray-400 mt-1">Configure and deploy your application</p>
                         </div>
                     </div>
-
                     <div className="space-y-6">
                         {/* Environment Selection */}
                         <div>
@@ -71,7 +63,6 @@ export default function DeployPage() {
                                 ))}
                             </div>
                         </div>
-
                         {/* Branch Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -88,7 +79,6 @@ export default function DeployPage() {
                                 <option value="staging">staging</option>
                             </select>
                         </div>
-
                         {/* Strategy Selection */}
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -116,7 +106,6 @@ export default function DeployPage() {
                                 ))}
                             </div>
                         </div>
-
                         {/* Deploy Button */}
                         <button
                             onClick={handleDeploy}
@@ -126,7 +115,6 @@ export default function DeployPage() {
                             <Play className="w-5 h-5" />
                             {deployMutation.isPending ? 'Deploying...' : 'Deploy Now'}
                         </button>
-
                         {deployMutation.isSuccess && (
                             <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
                                 <div className="text-green-400 font-medium">✓ Deployment started successfully!</div>
@@ -135,7 +123,6 @@ export default function DeployPage() {
                                 </div>
                             </div>
                         )}
-
                         {deployMutation.isError && (
                             <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
                                 <div className="text-red-400 font-medium">✗ Deployment failed</div>

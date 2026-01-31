@@ -1,31 +1,23 @@
 package analyzer
-
 import (
 	"context"
 	"os"
 	"path/filepath"
 	"strings"
 )
-
-// RustDetector detects Rust projects
 type RustDetector struct{}
-
 func NewRustDetector() *RustDetector {
 	return &RustDetector{}
 }
-
 func (d *RustDetector) Detect(ctx context.Context, path string) (*DetectionResult, error) {
 	cargoPath := filepath.Join(path, "Cargo.toml")
 	if _, err := os.Stat(cargoPath); os.IsNotExist(err) {
 		return nil, nil
 	}
-
-	// Read Cargo.toml to get version info
 	content, err := os.ReadFile(cargoPath)
 	if err != nil {
 		return nil, err
 	}
-
 	return &DetectionResult{
 		Language:   LanguageRust,
 		Confidence: 0.95,
@@ -33,11 +25,8 @@ func (d *RustDetector) Detect(ctx context.Context, path string) (*DetectionResul
 		Version:    d.extractRustVersion(string(content)),
 	}, nil
 }
-
 func (d *RustDetector) findEntryPoint(path string, cargoContent string) string {
-	// Check if it's a binary or library
 	if strings.Contains(cargoContent, "[[bin]]") {
-		// Binary project
 		entries := []string{"src/main.rs", "src/bin/main.rs"}
 		for _, entry := range entries {
 			if _, err := os.Stat(filepath.Join(path, entry)); err == nil {
@@ -45,16 +34,12 @@ func (d *RustDetector) findEntryPoint(path string, cargoContent string) string {
 			}
 		}
 	}
-
-	// Default to main.rs for binaries, lib.rs for libraries
 	if _, err := os.Stat(filepath.Join(path, "src/main.rs")); err == nil {
 		return "src/main.rs"
 	}
 	return "src/lib.rs"
 }
-
 func (d *RustDetector) extractRustVersion(content string) string {
-	// Extract rust-version from Cargo.toml if present
 	lines := strings.Split(content, "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "rust-version") {
@@ -64,18 +49,15 @@ func (d *RustDetector) extractRustVersion(content string) string {
 			}
 		}
 	}
-	return "1.75" // Default to recent stable
+	return "1.75"
 }
-
 func (d *RustDetector) DetectFramework(ctx context.Context, path string) (Framework, float64, error) {
 	cargoPath := filepath.Join(path, "Cargo.toml")
 	content, err := os.ReadFile(cargoPath)
 	if err != nil {
 		return FrameworkUnknown, 0, err
 	}
-
 	contentStr := string(content)
-
 	frameworks := []struct {
 		pattern    string
 		framework  Framework
@@ -89,28 +71,21 @@ func (d *RustDetector) DetectFramework(ctx context.Context, path string) (Framew
 		{"poem", FrameworkPoem, 0.95},
 		{"salvo", FrameworkSalvo, 0.95},
 	}
-
 	for _, fw := range frameworks {
 		if strings.Contains(contentStr, fw.pattern) {
 			return fw.framework, fw.confidence, nil
 		}
 	}
-
 	return FrameworkUnknown, 0.6, nil
 }
-
 func (d *RustDetector) DetectServices(ctx context.Context, path string) ([]Service, error) {
 	var services []Service
 	cargoPath := filepath.Join(path, "Cargo.toml")
-
 	content, err := os.ReadFile(cargoPath)
 	if err != nil {
 		return services, nil
 	}
-
 	contentStr := string(content)
-
-	// Database detection
 	if strings.Contains(contentStr, "sqlx") || strings.Contains(contentStr, "tokio-postgres") {
 		services = append(services, Service{
 			Type:    "postgresql",
@@ -139,8 +114,6 @@ func (d *RustDetector) DetectServices(ctx context.Context, path string) ([]Servi
 			Reason:  "MongoDB driver in Cargo.toml",
 		})
 	}
-
-	// Message queues
 	if strings.Contains(contentStr, "lapin") || strings.Contains(contentStr, "amqprs") {
 		services = append(services, Service{
 			Type:   "rabbitmq",
@@ -153,34 +126,26 @@ func (d *RustDetector) DetectServices(ctx context.Context, path string) ([]Servi
 			Reason: "Kafka client in Cargo.toml",
 		})
 	}
-
-	// Object storage
 	if strings.Contains(contentStr, "aws-sdk-s3") || strings.Contains(contentStr, "rusoto_s3") {
 		services = append(services, Service{
 			Type:   "s3",
 			Reason: "AWS S3 SDK in Cargo.toml",
 		})
 	}
-
 	return services, nil
 }
-
 func (d *RustDetector) ScanSecurity(ctx context.Context, path string) ([]SecurityIssue, error) {
 	var issues []SecurityIssue
-
-	// Check for unsafe code blocks (basic scan)
 	srcPath := filepath.Join(path, "src")
 	if _, err := os.Stat(srcPath); err == nil {
 		filepath.Walk(srcPath, func(filePath string, info os.FileInfo, err error) error {
 			if err != nil || info.IsDir() || !strings.HasSuffix(filePath, ".rs") {
 				return nil
 			}
-
 			content, err := os.ReadFile(filePath)
 			if err != nil {
 				return nil
 			}
-
 			if strings.Contains(string(content), "unsafe {") {
 				issues = append(issues, SecurityIssue{
 					Severity:    "medium",
@@ -190,12 +155,9 @@ func (d *RustDetector) ScanSecurity(ctx context.Context, path string) ([]Securit
 					Suggestion:  "Review unsafe code blocks for memory safety",
 				})
 			}
-
 			return nil
 		})
 	}
-
-	// Check for .env in .gitignore
 	gitignorePath := filepath.Join(path, ".gitignore")
 	if gitignoreContent, err := os.ReadFile(gitignorePath); err == nil {
 		if !strings.Contains(string(gitignoreContent), ".env") {
@@ -208,10 +170,8 @@ func (d *RustDetector) ScanSecurity(ctx context.Context, path string) ([]Securit
 			})
 		}
 	}
-
 	return issues, nil
 }
-
 func (d *RustDetector) GetBuildConfig(ctx context.Context, path string, framework Framework) (*BuildConfig, error) {
 	config := &BuildConfig{
 		BuildCommand: "cargo build --release",
@@ -222,8 +182,6 @@ func (d *RustDetector) GetBuildConfig(ctx context.Context, path string, framewor
 		BaseImage:    "rust:1.75-alpine",
 		MultiStage:   true,
 	}
-
-	// Framework-specific configurations
 	switch framework {
 	case FrameworkActix:
 		config.Port = 8080
@@ -237,56 +195,39 @@ func (d *RustDetector) GetBuildConfig(ctx context.Context, path string, framewor
 	case FrameworkWarp:
 		config.Port = 3030
 	}
-
-	// Generate optimized multi-stage Dockerfile
 	config.Dockerfile = d.generateDockerfile(config, framework)
-
 	return config, nil
 }
-
 func (d *RustDetector) generateDockerfile(config *BuildConfig, framework Framework) string {
 	dockerfile := `# Auto-generated by OpsAgent - Rust Multi-Stage Build
 FROM rust:1.75-alpine AS builder
 WORKDIR /app
-
 # Install build dependencies
 RUN apk add --no-cache musl-dev openssl-dev
-
 # Copy manifests
 COPY Cargo.toml Cargo.lock ./
-
 # Build dependencies (cached layer)
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
 RUN rm -rf src
-
 # Copy source code
 COPY . .
-
 # Build application
 RUN cargo build --release
-
 # Runtime stage
 FROM alpine:latest AS runner
 WORKDIR /app
-
 # Install runtime dependencies
 RUN apk add --no-cache ca-certificates libgcc
-
 # Create non-root user
 RUN addgroup -g 1000 appuser && \
     adduser -D -u 1000 -G appuser appuser
-
 # Copy binary from builder
 COPY --from=builder /app/target/release/app /app/app
-
 # Set ownership
 RUN chown -R appuser:appuser /app
-
 USER appuser
-
 EXPOSE ` + string(rune(config.Port)) + `
-
 CMD ["./app"]
 `
 	return dockerfile

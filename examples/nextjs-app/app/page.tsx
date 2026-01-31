@@ -8,34 +8,29 @@ export default function Home() {
                 <p className="text-xl text-gray-600">
                     Production-ready Next.js application deployed with OpsAgent
                 </p>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12">
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <div className="text-3xl mb-2">⚡</div>
                         <h3 className="font-semibold text-lg">Next.js 14</h3>
                         <p className="text-sm text-gray-600">App Router + Server Components</p>
                     </div>
-
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <div className="text-3xl mb-2">🗄️</div>
                         <h3 className="font-semibold text-lg">PostgreSQL</h3>
                         <p className="text-sm text-gray-600">Managed database with backups</p>
                     </div>
-
                     <div className="bg-white p-6 rounded-lg shadow-md">
                         <div className="text-3xl mb-2">⚡</div>
                         <h3 className="font-semibold text-lg">Redis</h3>
                         <p className="text-sm text-gray-600">High-performance caching</p>
                     </div>
                 </div>
-
                 <div className="mt-8 space-y-4">
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <p className="text-green-800 font-semibold">✓ Deployed with OpsAgent</p>
                         <p className="text-green-600 text-sm">Auto-scaling • Zero-downtime • Monitoring</p>
                     </div>
                 </div>
-
                 <div className="mt-8 flex gap-4 justify-center">
                     <a
                         href="/api/health"

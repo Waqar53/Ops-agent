@@ -1,5 +1,4 @@
 package analyzer
-
 import (
 	"bufio"
 	"context"
@@ -7,21 +6,15 @@ import (
 	"path/filepath"
 	"strings"
 )
-
-// RubyDetector detects Ruby projects
 type RubyDetector struct{}
-
 func NewRubyDetector() *RubyDetector {
 	return &RubyDetector{}
 }
-
 func (d *RubyDetector) Detect(ctx context.Context, path string) (*DetectionResult, error) {
-	// Check for Gemfile (Ruby's package manager)
 	gemfilePath := filepath.Join(path, "Gemfile")
 	if _, err := os.Stat(gemfilePath); os.IsNotExist(err) {
 		return nil, nil
 	}
-
 	return &DetectionResult{
 		Language:   LanguageRuby,
 		Confidence: 0.9,
@@ -29,32 +22,23 @@ func (d *RubyDetector) Detect(ctx context.Context, path string) (*DetectionResul
 		Version:    d.extractRubyVersion(path),
 	}, nil
 }
-
 func (d *RubyDetector) findEntryPoint(path string) string {
-	// Rails application
 	if _, err := os.Stat(filepath.Join(path, "config/application.rb")); err == nil {
 		return "config.ru"
 	}
-
-	// Sinatra or other Rack apps
 	entries := []string{"config.ru", "app.rb", "server.rb", "main.rb"}
 	for _, entry := range entries {
 		if _, err := os.Stat(filepath.Join(path, entry)); err == nil {
 			return entry
 		}
 	}
-
 	return "config.ru"
 }
-
 func (d *RubyDetector) extractRubyVersion(path string) string {
-	// Check .ruby-version file
 	versionPath := filepath.Join(path, ".ruby-version")
 	if content, err := os.ReadFile(versionPath); err == nil {
 		return strings.TrimSpace(string(content))
 	}
-
-	// Check Gemfile for ruby version
 	gemfilePath := filepath.Join(path, "Gemfile")
 	if content, err := os.ReadFile(gemfilePath); err == nil {
 		lines := strings.Split(string(content), "\n")
@@ -67,19 +51,15 @@ func (d *RubyDetector) extractRubyVersion(path string) string {
 			}
 		}
 	}
-
-	return "3.2" // Default to recent stable
+	return "3.2"
 }
-
 func (d *RubyDetector) DetectFramework(ctx context.Context, path string) (Framework, float64, error) {
 	gemfilePath := filepath.Join(path, "Gemfile")
 	content, err := os.ReadFile(gemfilePath)
 	if err != nil {
 		return FrameworkUnknown, 0, err
 	}
-
 	contentStr := strings.ToLower(string(content))
-
 	frameworks := []struct {
 		pattern    string
 		framework  Framework
@@ -96,31 +76,24 @@ func (d *RubyDetector) DetectFramework(ctx context.Context, path string) (Framew
 		{"gem 'grape'", FrameworkGrape, 0.90},
 		{"gem \"grape\"", FrameworkGrape, 0.90},
 	}
-
 	for _, fw := range frameworks {
 		if strings.Contains(contentStr, fw.pattern) {
 			return fw.framework, fw.confidence, nil
 		}
 	}
-
 	return FrameworkUnknown, 0.5, nil
 }
-
 func (d *RubyDetector) DetectServices(ctx context.Context, path string) ([]Service, error) {
 	var services []Service
 	gemfilePath := filepath.Join(path, "Gemfile")
-
 	file, err := os.Open(gemfilePath)
 	if err != nil {
 		return services, nil
 	}
 	defer file.Close()
-
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.ToLower(scanner.Text())
-
-		// Database detection
 		if strings.Contains(line, "pg") || strings.Contains(line, "postgresql") {
 			services = append(services, Service{
 				Type:    "postgresql",
@@ -149,8 +122,6 @@ func (d *RubyDetector) DetectServices(ctx context.Context, path string) ([]Servi
 				Reason:  "MongoDB gem in Gemfile",
 			})
 		}
-
-		// Background jobs
 		if strings.Contains(line, "sidekiq") {
 			services = append(services, Service{
 				Type:   "sidekiq-worker",
@@ -163,8 +134,6 @@ func (d *RubyDetector) DetectServices(ctx context.Context, path string) ([]Servi
 				Reason: "Resque gem in Gemfile",
 			})
 		}
-
-		// Search
 		if strings.Contains(line, "elasticsearch") {
 			services = append(services, Service{
 				Type:    "elasticsearch",
@@ -172,8 +141,6 @@ func (d *RubyDetector) DetectServices(ctx context.Context, path string) ([]Servi
 				Reason:  "Elasticsearch gem in Gemfile",
 			})
 		}
-
-		// Object storage
 		if strings.Contains(line, "aws-sdk-s3") {
 			services = append(services, Service{
 				Type:   "s3",
@@ -181,14 +148,10 @@ func (d *RubyDetector) DetectServices(ctx context.Context, path string) ([]Servi
 			})
 		}
 	}
-
 	return services, nil
 }
-
 func (d *RubyDetector) ScanSecurity(ctx context.Context, path string) ([]SecurityIssue, error) {
 	var issues []SecurityIssue
-
-	// Check for secrets in config files
 	configPath := filepath.Join(path, "config/secrets.yml")
 	if _, err := os.Stat(configPath); err == nil {
 		issues = append(issues, SecurityIssue{
@@ -199,8 +162,6 @@ func (d *RubyDetector) ScanSecurity(ctx context.Context, path string) ([]Securit
 			Suggestion:  "Use environment variables or Rails credentials instead",
 		})
 	}
-
-	// Check for database.yml with hardcoded credentials
 	dbConfigPath := filepath.Join(path, "config/database.yml")
 	if content, err := os.ReadFile(dbConfigPath); err == nil {
 		if strings.Contains(string(content), "password:") && !strings.Contains(string(content), "ENV") {
@@ -213,8 +174,6 @@ func (d *RubyDetector) ScanSecurity(ctx context.Context, path string) ([]Securit
 			})
 		}
 	}
-
-	// Check for .env in .gitignore
 	gitignorePath := filepath.Join(path, ".gitignore")
 	if gitignoreContent, err := os.ReadFile(gitignorePath); err == nil {
 		if !strings.Contains(string(gitignoreContent), ".env") {
@@ -227,8 +186,6 @@ func (d *RubyDetector) ScanSecurity(ctx context.Context, path string) ([]Securit
 			})
 		}
 	}
-
-	// Check for Rails secret_key_base
 	secretsPath := filepath.Join(path, "config/secrets.yml")
 	if content, err := os.ReadFile(secretsPath); err == nil {
 		if strings.Contains(string(content), "secret_key_base:") && !strings.Contains(string(content), "ENV") {
@@ -241,10 +198,8 @@ func (d *RubyDetector) ScanSecurity(ctx context.Context, path string) ([]Securit
 			})
 		}
 	}
-
 	return issues, nil
 }
-
 func (d *RubyDetector) GetBuildConfig(ctx context.Context, path string, framework Framework) (*BuildConfig, error) {
 	config := &BuildConfig{
 		BuildCommand: "bundle install --without development test",
@@ -258,7 +213,6 @@ func (d *RubyDetector) GetBuildConfig(ctx context.Context, path string, framewor
 		BaseImage:  "ruby:3.2-alpine",
 		MultiStage: true,
 	}
-
 	switch framework {
 	case FrameworkRails:
 		config.BuildCommand = "bundle install --without development test && bundle exec rake assets:precompile"
@@ -279,56 +233,40 @@ func (d *RubyDetector) GetBuildConfig(ctx context.Context, path string, framewor
 		config.StartCommand = "bundle exec rackup -o 0.0.0.0 -p 9292"
 		config.Port = 9292
 	}
-
 	config.Dockerfile = d.generateDockerfile(config, framework)
-
 	return config, nil
 }
-
 func (d *RubyDetector) generateDockerfile(config *BuildConfig, framework Framework) string {
 	dockerfile := `# Auto-generated by OpsAgent - Ruby Multi-Stage Build
 FROM ruby:3.2-alpine AS builder
 WORKDIR /app
-
 # Install build dependencies
 RUN apk add --no-cache build-base postgresql-dev nodejs yarn tzdata
-
 # Copy Gemfile
 COPY Gemfile Gemfile.lock ./
-
 # Install gems
 RUN bundle config set --local deployment 'true' && \
     bundle config set --local without 'development test' && \
     bundle install -j4
-
 # Copy application code
 COPY . .
-
 # Precompile assets (Rails)
 RUN if [ -f "bin/rails" ]; then bundle exec rake assets:precompile; fi
-
 # Runtime stage
 FROM ruby:3.2-alpine AS runner
 WORKDIR /app
-
 # Install runtime dependencies
 RUN apk add --no-cache postgresql-client tzdata
-
 # Create non-root user
 RUN addgroup -g 1000 appuser && \
     adduser -D -u 1000 -G appuser appuser
-
 # Copy gems and app from builder
 COPY --from=builder /usr/local/bundle /usr/local/bundle
 COPY --from=builder /app /app
-
 # Set ownership
 RUN chown -R appuser:appuser /app
-
 USER appuser
-
 EXPOSE ` + string(rune(config.Port)) + `
-
 CMD ["` + config.StartCommand + `"]
 `
 	return dockerfile

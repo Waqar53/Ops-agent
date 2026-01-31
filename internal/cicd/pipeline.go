@@ -1,12 +1,9 @@
 package cicd
-
 import (
 	"context"
 	"fmt"
 	"time"
 )
-
-// Pipeline represents a CI/CD pipeline
 type Pipeline struct {
 	ID          string
 	ProjectID   string
@@ -18,16 +15,12 @@ type Pipeline struct {
 	Artifacts   []Artifact
 	CreatedAt   time.Time
 }
-
-// Stage represents a pipeline stage
 type Stage struct {
 	Name      string
 	Jobs      []Job
 	Parallel  bool
 	Condition string
 }
-
-// Job represents a job within a stage
 type Job struct {
 	Name        string
 	Image       string
@@ -38,61 +31,43 @@ type Job struct {
 	Timeout     time.Duration
 	Retry       int
 }
-
-// CacheConfig for job caching
 type CacheConfig struct {
 	Paths []string
 	Key   string
 }
-
-// Trigger defines when a pipeline runs
 type Trigger struct {
-	Type   string // push, pull_request, schedule, manual
+	Type   string
 	Branch string
 	Cron   string
 }
-
-// Artifact represents a build artifact
 type Artifact struct {
 	Name string
 	Path string
-	Type string // docker, binary, archive
+	Type string
 }
-
-// PipelineExecutor executes CI/CD pipelines
 type PipelineExecutor struct {
 	containerRunner ContainerRunner
 	testRunner      TestRunner
 	securityScanner SecurityScanner
 	artifactStore   ArtifactStore
 }
-
-// ContainerRunner runs containers
 type ContainerRunner interface {
 	Run(ctx context.Context, image string, cmd []string, env map[string]string) error
 }
-
-// TestRunner runs tests
 type TestRunner interface {
 	RunUnitTests(ctx context.Context, path string) (*TestResult, error)
 	RunIntegrationTests(ctx context.Context, path string) (*TestResult, error)
 	RunE2ETests(ctx context.Context, path string) (*TestResult, error)
 }
-
-// SecurityScanner scans for vulnerabilities
 type SecurityScanner interface {
 	ScanCode(ctx context.Context, path string) (*ScanResult, error)
 	ScanDependencies(ctx context.Context, path string) (*ScanResult, error)
 	ScanContainer(ctx context.Context, image string) (*ScanResult, error)
 }
-
-// ArtifactStore stores build artifacts
 type ArtifactStore interface {
 	Upload(ctx context.Context, artifact *Artifact) error
 	Download(ctx context.Context, name string) (*Artifact, error)
 }
-
-// TestResult holds test results
 type TestResult struct {
 	Passed   int
 	Failed   int
@@ -100,8 +75,6 @@ type TestResult struct {
 	Duration time.Duration
 	Coverage float64
 }
-
-// ScanResult holds security scan results
 type ScanResult struct {
 	Critical int
 	High     int
@@ -109,8 +82,6 @@ type ScanResult struct {
 	Low      int
 	Issues   []SecurityIssue
 }
-
-// SecurityIssue represents a security issue
 type SecurityIssue struct {
 	Severity    string
 	Type        string
@@ -119,8 +90,6 @@ type SecurityIssue struct {
 	Line        int
 	Fix         string
 }
-
-// NewPipelineExecutor creates a new pipeline executor
 func NewPipelineExecutor(
 	runner ContainerRunner,
 	tester TestRunner,
@@ -134,47 +103,38 @@ func NewPipelineExecutor(
 		artifactStore:   store,
 	}
 }
-
-// Execute executes a pipeline
 func (pe *PipelineExecutor) Execute(ctx context.Context, pipeline *Pipeline) (*PipelineResult, error) {
 	result := &PipelineResult{
 		PipelineID: pipeline.ID,
 		StartTime:  time.Now(),
 		Stages:     []StageResult{},
 	}
-
 	for _, stage := range pipeline.Stages {
 		stageResult := pe.executeStage(ctx, &stage, pipeline)
 		result.Stages = append(result.Stages, stageResult)
-
 		if stageResult.Status == "failed" {
 			result.Status = "failed"
 			result.EndTime = time.Now()
 			return result, fmt.Errorf("stage %s failed", stage.Name)
 		}
 	}
-
 	result.Status = "success"
 	result.EndTime = time.Now()
 	return result, nil
 }
-
 func (pe *PipelineExecutor) executeStage(ctx context.Context, stage *Stage, pipeline *Pipeline) StageResult {
 	result := StageResult{
 		Name:      stage.Name,
 		StartTime: time.Now(),
 		Jobs:      []JobResult{},
 	}
-
 	if stage.Parallel {
-		// Execute jobs in parallel
 		jobResults := make(chan JobResult, len(stage.Jobs))
 		for _, job := range stage.Jobs {
 			go func(j Job) {
 				jobResults <- pe.executeJob(ctx, &j, pipeline)
 			}(job)
 		}
-
 		for range stage.Jobs {
 			jobResult := <-jobResults
 			result.Jobs = append(result.Jobs, jobResult)
@@ -183,7 +143,6 @@ func (pe *PipelineExecutor) executeStage(ctx context.Context, stage *Stage, pipe
 			}
 		}
 	} else {
-		// Execute jobs sequentially
 		for _, job := range stage.Jobs {
 			jobResult := pe.executeJob(ctx, &job, pipeline)
 			result.Jobs = append(result.Jobs, jobResult)
@@ -193,22 +152,17 @@ func (pe *PipelineExecutor) executeStage(ctx context.Context, stage *Stage, pipe
 			}
 		}
 	}
-
 	if result.Status == "" {
 		result.Status = "success"
 	}
-
 	result.EndTime = time.Now()
 	return result
 }
-
 func (pe *PipelineExecutor) executeJob(ctx context.Context, job *Job, pipeline *Pipeline) JobResult {
 	result := JobResult{
 		Name:      job.Name,
 		StartTime: time.Now(),
 	}
-
-	// Merge environment variables
 	env := make(map[string]string)
 	for k, v := range pipeline.Environment {
 		env[k] = v
@@ -216,8 +170,6 @@ func (pe *PipelineExecutor) executeJob(ctx context.Context, job *Job, pipeline *
 	for k, v := range job.Environment {
 		env[k] = v
 	}
-
-	// Execute job script
 	for _, cmd := range job.Script {
 		if err := pe.containerRunner.Run(ctx, job.Image, []string{"sh", "-c", cmd}, env); err != nil {
 			result.Status = "failed"
@@ -226,13 +178,10 @@ func (pe *PipelineExecutor) executeJob(ctx context.Context, job *Job, pipeline *
 			return result
 		}
 	}
-
 	result.Status = "success"
 	result.EndTime = time.Now()
 	return result
 }
-
-// GeneratePipeline generates a pipeline based on project analysis
 func (pe *PipelineExecutor) GeneratePipeline(language, framework string) *Pipeline {
 	pipeline := &Pipeline{
 		ID:   fmt.Sprintf("pipeline_%d", time.Now().UnixNano()),
@@ -296,10 +245,8 @@ func (pe *PipelineExecutor) GeneratePipeline(language, framework string) *Pipeli
 			{Type: "pull_request"},
 		},
 	}
-
 	return pipeline
 }
-
 func (pe *PipelineExecutor) getBuildImage(language string) string {
 	images := map[string]string{
 		"nodejs": "node:18-alpine",
@@ -314,7 +261,6 @@ func (pe *PipelineExecutor) getBuildImage(language string) string {
 	}
 	return "alpine:latest"
 }
-
 func (pe *PipelineExecutor) getBuildCommand(language, framework string) string {
 	commands := map[string]string{
 		"nodejs": "npm ci && npm run build",
@@ -329,7 +275,6 @@ func (pe *PipelineExecutor) getBuildCommand(language, framework string) string {
 	}
 	return "echo 'No build command defined'"
 }
-
 func (pe *PipelineExecutor) getTestCommand(language, framework string) string {
 	commands := map[string]string{
 		"nodejs": "npm test",
@@ -344,8 +289,6 @@ func (pe *PipelineExecutor) getTestCommand(language, framework string) string {
 	}
 	return "echo 'No test command defined'"
 }
-
-// PipelineResult holds pipeline execution result
 type PipelineResult struct {
 	PipelineID string
 	Status     string
@@ -353,8 +296,6 @@ type PipelineResult struct {
 	EndTime    time.Time
 	Stages     []StageResult
 }
-
-// StageResult holds stage execution result
 type StageResult struct {
 	Name      string
 	Status    string
@@ -362,8 +303,6 @@ type StageResult struct {
 	EndTime   time.Time
 	Jobs      []JobResult
 }
-
-// JobResult holds job execution result
 type JobResult struct {
 	Name      string
 	Status    string

@@ -1,27 +1,16 @@
 package cost
-
 import (
 	"context"
 	"time"
 )
-
-// CostManager manages cost tracking and optimization
 type CostManager struct {
 	tracker    *CostTracker
 	optimizer  *CostOptimizer
 	forecaster *CostForecaster
 }
-
-// CostTracker tracks infrastructure costs
 type CostTracker struct{}
-
-// CostOptimizer provides cost optimization recommendations
 type CostOptimizer struct{}
-
-// CostForecaster forecasts future costs
 type CostForecaster struct{}
-
-// CostReport represents a cost report
 type CostReport struct {
 	Period      string
 	TotalCost   float64
@@ -30,8 +19,6 @@ type CostReport struct {
 	Savings     float64
 	GeneratedAt time.Time
 }
-
-// Recommendation represents a cost optimization recommendation
 type Recommendation struct {
 	ID          string
 	Type        string
@@ -40,16 +27,12 @@ type Recommendation struct {
 	Effort      string
 	Priority    string
 }
-
-// Forecast represents a cost forecast
 type Forecast struct {
 	Period     string
 	Projected  float64
 	Confidence float64
 	Factors    []string
 }
-
-// NewCostManager creates a new cost manager
 func NewCostManager() *CostManager {
 	return &CostManager{
 		tracker:    &CostTracker{},
@@ -57,8 +40,6 @@ func NewCostManager() *CostManager {
 		forecaster: &CostForecaster{},
 	}
 }
-
-// GetCostReport generates a cost report
 func (cm *CostManager) GetCostReport(ctx context.Context, period string) (*CostReport, error) {
 	return &CostReport{
 		Period:    period,
@@ -74,8 +55,6 @@ func (cm *CostManager) GetCostReport(ctx context.Context, period string) (*CostR
 		GeneratedAt: time.Now(),
 	}, nil
 }
-
-// GetRecommendations gets cost optimization recommendations
 func (cm *CostManager) GetRecommendations(ctx context.Context) ([]*Recommendation, error) {
 	return []*Recommendation{
 		{
@@ -96,8 +75,6 @@ func (cm *CostManager) GetRecommendations(ctx context.Context) ([]*Recommendatio
 		},
 	}, nil
 }
-
-// ForecastCosts forecasts future costs
 func (cm *CostManager) ForecastCosts(ctx context.Context, months int) ([]*Forecast, error) {
 	forecasts := []*Forecast{}
 	for i := 1; i <= months; i++ {

@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/db';
-
 export async function POST(request: Request) {
     try {
         const body = await request.json();
         const { amount, currency = 'usd' } = body;
-
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency,
@@ -13,7 +11,6 @@ export async function POST(request: Request) {
                 enabled: true,
             },
         });
-
         return NextResponse.json({
             clientSecret: paymentIntent.client_secret,
         });

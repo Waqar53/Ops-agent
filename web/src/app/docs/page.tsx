@@ -1,11 +1,8 @@
 'use client';
-
 import Link from 'next/link';
 import { useState } from 'react';
-
 export default function DocsPage() {
     const [activeSection, setActiveSection] = useState('quickstart');
-
     const sections = [
         { id: 'quickstart', title: 'Quick Start' },
         { id: 'installation', title: 'Installation' },
@@ -15,7 +12,6 @@ export default function DocsPage() {
         { id: 'security', title: 'Security' },
         { id: 'api', title: 'API Reference' },
     ];
-
     return (
         <div style={styles.page}>
             <nav style={styles.nav}>
@@ -32,7 +28,6 @@ export default function DocsPage() {
                     </div>
                 </div>
             </nav>
-
             <div style={styles.container}>
                 <aside style={styles.sidebar}>
                     <h3 style={styles.sidebarTitle}>Documentation</h3>
@@ -47,72 +42,58 @@ export default function DocsPage() {
                         </a>
                     ))}
                 </aside>
-
                 <main style={styles.content}>
                     <section id="quickstart" style={styles.section}>
                         <h1 style={styles.h1}>Quick Start Guide</h1>
                         <p style={styles.intro}>
                             Get your first application deployed in under 5 minutes with OpsAgent.
                         </p>
-
                         <div style={styles.codeBlock}>
                             <div style={styles.codeHeader}>Terminal</div>
                             <pre style={styles.pre}>
                                 {`# Install OpsAgent CLI
 npm install -g @opsagent/cli
-
 # Navigate to your project
 cd my-project
-
 # Initialize OpsAgent (AI analyzes your code)
 ops init
-
 # Deploy to production
 ops deploy`}
                             </pre>
                         </div>
-
                         <p style={styles.text}>
                             That's it! OpsAgent automatically detects your language, framework,
                             dependencies, and configures everything for optimal deployment.
                         </p>
                     </section>
-
                     <section id="installation" style={styles.section}>
                         <h2 style={styles.h2}>Installation</h2>
-
                         <h3 style={styles.h3}>Prerequisites</h3>
                         <ul style={styles.list}>
                             <li>Node.js 18+ or npm 8+</li>
                             <li>A supported cloud account (AWS, GCP, or Azure)</li>
                             <li>OpsAgent account (free tier available)</li>
                         </ul>
-
                         <h3 style={styles.h3}>Install via npm</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>npm install -g @opsagent/cli</pre>
                         </div>
-
                         <h3 style={styles.h3}>Verify Installation</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>ops --version</pre>
                         </div>
-
                         <h3 style={styles.h3}>Login to OpsAgent</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>ops login</pre>
                         </div>
                     </section>
-
                     <section id="configuration" style={styles.section}>
                         <h2 style={styles.h2}>Configuration</h2>
-
                         <p style={styles.text}>
                             When you run <code style={styles.code}>ops init</code>, OpsAgent's AI
                             analyzes your codebase and generates an <code style={styles.code}>opsagent.yml</code>
                             configuration file.
                         </p>
-
                         <h3 style={styles.h3}>AI-Detected Configuration</h3>
                         <div style={styles.codeBlock}>
                             <div style={styles.codeHeader}>opsagent.yml</div>
@@ -122,13 +103,11 @@ app:
   name: my-saas-app
   language: Node.js
   framework: Next.js
-
 build:
   base_image: node:20-alpine
   port: 3000
   health_check: /api/health
   multi_stage: true
-
 environments:
   production:
     replicas: 2
@@ -140,7 +119,6 @@ environments:
       min: 1
       max: 10
       target_cpu: 70
-
 services:
   postgresql:
     version: "15"
@@ -149,7 +127,6 @@ services:
       frequency: daily
   redis:
     version: "7"
-
 monitoring:
   metrics: true
   logging: true
@@ -158,14 +135,12 @@ monitoring:
     - memory_usage > 85%
     - error_rate > 1%
     - latency_p99 > 500ms
-
 security:
   ssl: auto
   secrets: encrypted
   scanning: true`}
                             </pre>
                         </div>
-
                         <h3 style={styles.h3}>What Gets Detected</h3>
                         <table style={styles.table}>
                             <thead>
@@ -194,51 +169,40 @@ security:
                             </tbody>
                         </table>
                     </section>
-
                     <section id="deploy" style={styles.section}>
                         <h2 style={styles.h2}>Deploying Your Application</h2>
-
                         <h3 style={styles.h3}>Basic Deploy</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>ops deploy</pre>
                         </div>
-
                         <h3 style={styles.h3}>Deploy to Specific Environment</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>{`ops deploy --env staging
 ops deploy --env production`}</pre>
                         </div>
-
                         <h3 style={styles.h3}>Dry Run (Preview Changes)</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>ops deploy --dry-run</pre>
                         </div>
-
                         <h3 style={styles.h3}>Deployment Strategies</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>{`# Rolling deployment (default)
 ops deploy --strategy rolling
-
 # Blue-green deployment
 ops deploy --strategy blue-green
-
 # Canary deployment (10% traffic first)
 ops deploy --strategy canary --canary-percent 10`}</pre>
                         </div>
-
                         <div style={styles.alert}>
                             <strong>💡 Pro Tip:</strong> Use <code style={styles.code}>--dry-run</code> to
                             preview what OpsAgent will deploy before making changes.
                         </div>
                     </section>
-
                     <section id="monitoring" style={styles.section}>
                         <h2 style={styles.h2}>Monitoring & Observability</h2>
-
                         <p style={styles.text}>
                             OpsAgent automatically configures monitoring for every deployment:
                         </p>
-
                         <h3 style={styles.h3}>Default Alert Rules</h3>
                         <ul style={styles.list}>
                             <li><strong>CPU Usage &gt; 80%</strong> - Triggers scale-up or alert</li>
@@ -246,23 +210,19 @@ ops deploy --strategy canary --canary-percent 10`}</pre>
                             <li><strong>Error Rate &gt; 1%</strong> - Application health issue</li>
                             <li><strong>P99 Latency &gt; 500ms</strong> - Performance degradation</li>
                         </ul>
-
                         <h3 style={styles.h3}>View Logs</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>{`ops logs
 ops logs --follow
 ops logs --since 1h`}</pre>
                         </div>
-
                         <h3 style={styles.h3}>View Metrics</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>ops metrics</pre>
                         </div>
                     </section>
-
                     <section id="security" style={styles.section}>
                         <h2 style={styles.h2}>Security</h2>
-
                         <h3 style={styles.h3}>Automatic Security Features</h3>
                         <ul style={styles.list}>
                             <li><strong>SSL/TLS:</strong> Automatic certificate provisioning</li>
@@ -270,33 +230,26 @@ ops logs --since 1h`}</pre>
                             <li><strong>Scanning:</strong> Vulnerability detection in dependencies</li>
                             <li><strong>Compliance:</strong> SOC2, HIPAA-ready configurations</li>
                         </ul>
-
                         <h3 style={styles.h3}>Managing Secrets</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>{`# Set a secret
-ops secrets set DATABASE_URL "postgresql://..."
-
+ops secrets set DATABASE_URL "postgresql:
 # List secrets (values hidden)
 ops secrets list
-
 # Remove a secret
 ops secrets delete API_KEY`}</pre>
                         </div>
                     </section>
-
                     <section id="api" style={styles.section}>
                         <h2 style={styles.h2}>API Reference</h2>
-
                         <p style={styles.text}>
                             OpsAgent provides a REST API for programmatic access to all features.
                         </p>
-
                         <h3 style={styles.h3}>Authentication</h3>
                         <div style={styles.codeBlock}>
                             <pre style={styles.pre}>{`curl -H "Authorization: Bearer YOUR_API_KEY" \\
-  https://api.opsagent.dev/v1/projects`}</pre>
+  https:
                         </div>
-
                         <h3 style={styles.h3}>Endpoints</h3>
                         <table style={styles.table}>
                             <thead>
@@ -316,7 +269,6 @@ ops secrets delete API_KEY`}</pre>
                             </tbody>
                         </table>
                     </section>
-
                     <div style={styles.cta}>
                         <h3 style={styles.ctaTitle}>Ready to Deploy?</h3>
                         <p style={styles.ctaText}>Start your 7-day free trial and deploy your first app in minutes.</p>
@@ -324,14 +276,12 @@ ops secrets delete API_KEY`}</pre>
                     </div>
                 </main>
             </div>
-
             <footer style={styles.footer}>
                 <p style={styles.footerText}>© 2024 OpsAgent by Mohd Waqar Azim. All rights reserved.</p>
             </footer>
         </div>
     );
 }   
-
 const styles: { [key: string]: React.CSSProperties } = {
     page: {
         minHeight: '100vh',

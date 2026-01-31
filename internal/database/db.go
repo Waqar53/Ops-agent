@@ -1,61 +1,42 @@
 package database
-
 import (
 	"context"
 	"database/sql"
 	"fmt"
 	"os"
 	"time"
-
 	_ "github.com/lib/pq"
 )
-
 type DB struct {
 	*sql.DB
 }
-
 var db *DB
-
-// Connect establishes database connection
 func Connect() (*DB, error) {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		connStr = "postgres://postgres:postgres@localhost:5432/opsagent?sslmode=disable"
+		connStr = "postgres:
 	}
-
 	sqlDB, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
-
-	// Set connection pool settings
 	sqlDB.SetMaxOpenConns(25)
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetConnMaxLifetime(5 * time.Minute)
-
-	// Test connection
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
 	if err := sqlDB.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
-
 	db = &DB{sqlDB}
 	return db, nil
 }
-
-// GetDB returns the global database instance
 func GetDB() *DB {
 	return db
 }
-
-// Close closes the database connection
 func (db *DB) Close() error {
 	return db.DB.Close()
 }
-
-// Project represents a project in the database
 type Project struct {
 	ID          string                 `json:"id"`
 	Name        string                 `json:"name"`
@@ -70,8 +51,6 @@ type Project struct {
 	UpdatedAt   time.Time              `json:"updatedAt"`
 	Metadata    map[string]interface{} `json:"metadata"`
 }
-
-// Environment represents an environment
 type Environment struct {
 	ID        string                 `json:"id"`
 	ProjectID string                 `json:"projectId"`
@@ -83,8 +62,6 @@ type Environment struct {
 	CreatedAt time.Time              `json:"createdAt"`
 	UpdatedAt time.Time              `json:"updatedAt"`
 }
-
-// Deployment represents a deployment
 type Deployment struct {
 	ID              string                 `json:"id"`
 	ProjectID       string                 `json:"projectId"`
@@ -100,8 +77,6 @@ type Deployment struct {
 	DurationSeconds *int                   `json:"durationSeconds,omitempty"`
 	Metadata        map[string]interface{} `json:"metadata"`
 }
-
-// Service represents a detected service
 type Service struct {
 	ID        string                 `json:"id"`
 	ProjectID string                 `json:"projectId"`
@@ -114,8 +89,6 @@ type Service struct {
 	CreatedAt time.Time              `json:"createdAt"`
 	UpdatedAt time.Time              `json:"updatedAt"`
 }
-
-// Alert represents an alert
 type Alert struct {
 	ID            string                 `json:"id"`
 	ProjectID     string                 `json:"projectId"`
@@ -129,8 +102,6 @@ type Alert struct {
 	ResolvedAt    *time.Time             `json:"resolvedAt,omitempty"`
 	Metadata      map[string]interface{} `json:"metadata"`
 }
-
-// Cost represents cost data
 type Cost struct {
 	ID            string                 `json:"id"`
 	ProjectID     string                 `json:"projectId"`
