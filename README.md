@@ -15,7 +15,7 @@
 
 ---
 
-**[Live Demo](https://opsagent.dev)** · **[Documentation](https://docs.opsagent.dev)** · **[Product Hunt](https://producthunt.com/posts/opsagent)** · **[Discord](https://discord.gg/opsagent)**
+**[Live Demo](https://web-mu-blue-64.vercel.app)** · **[Documentation](https://docs.opsagent.dev)** · **[Product Hunt](https://producthunt.com/posts/opsagent)** · **[Discord](https://discord.gg/opsagent)**
 
 <br>
 
